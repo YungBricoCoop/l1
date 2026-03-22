@@ -6,10 +6,17 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/YungBricoCoop/l1/cmd"
+	"github.com/YungBricoCoop/l1/internal/ui"
 )
 
 const Version = "0.1.0"
 
 func main() {
-	fmt.Fprintf(os.Stdout, "mycli version %s\n", Version)
+	if err := cmd.Execute(Version); err != nil {
+		styles := ui.NewStyles(ui.ShouldUseColor(true, os.Stderr))
+		fmt.Fprintln(os.Stderr, styles.Error(fmt.Sprintf("error: %v", err)))
+		os.Exit(1)
+	}
 }

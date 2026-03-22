@@ -239,6 +239,13 @@ linters:
         - switch
         - map
 
+    forbidigo:
+      # Allow fmt.Print* while keeping forbidigo active for builtin debug prints.
+      # Default: ["^(fmt\\.Print(|f|ln)|print|println)$"]
+      forbid:
+        - pattern: "^print$"
+        - pattern: "^println$"
+
     exhaustruct:
       # List of regular expressions to match type names that should be excluded from processing.
       # Anonymous structs can be matched by '<anonymous>' alias.
@@ -321,10 +328,6 @@ linters:
         # Assert no unused link in godocs.
         # https://github.com/godoc-lint/godoc-lint?tab=readme-ov-file#no-unused-link
         - no-unused-link
-        # Require proper doc links to standard library declarations where applicable.
-        # https://github.com/godoc-lint/godoc-lint?tab=readme-ov-file#require-stdlib-doclink
-        - require-stdlib-doclink
-
     govet:
       # Enable all analyzers.
       # Default: false
