@@ -2,6 +2,39 @@
 
 `l1` is a cli tool made to simplify some common tasks
 
+## Install
+
+`l1` can be installed directly using the following one-liner commands:
+
+Unix/macOS/Linux/Windows(Git Bash):
+
+```bash
+curl -sSfL https://raw.githubusercontent.com/YungBricoCoop/l1/main/install.sh | sh
+```
+
+Alpine:
+
+```bash
+wget -qO- https://raw.githubusercontent.com/YungBricoCoop/l1/main/install.sh | sh
+```
+
+Specific version:
+
+```bash
+curl -sSfL https://raw.githubusercontent.com/YungBricoCoop/l1/main/install.sh | sh -s -- v0.1.0
+```
+
+Custom install directory:
+
+```bash
+curl -sSfL https://raw.githubusercontent.com/YungBricoCoop/l1/main/install.sh | sh -s -- -b /usr/local/bin
+```
+
+Notes:
+
+- On Unix, default install path is `/usr/local/bin` (fallback: `~/.local/bin`).
+- On Windows Git Bash, default install path is `~/bin`.
+
 ## Commands
 
 ```bash

@@ -1,0 +1,27 @@
+version: 2
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -trimpath
+    binary: l1
+
+archives:
+  - format: tar.gz
+    name_template: "l1_{{ .Version | trimPrefix `v` }}_{{ .Os }}_{{ .Arch }}"
+    wrap_in_directory: false
+  - id: windows
+    builds: [default]
+    format: zip
+    name_template: "l1_{{ .Version | trimPrefix `v` }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
