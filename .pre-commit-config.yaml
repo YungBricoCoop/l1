@@ -1,0 +1,18 @@
+repos:
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: v6.2.0
+    hooks:
+      - id: reuse
+        args: ["lint"]
+  - repo: local
+    hooks:
+      - id: golangci-lint-fmt
+        name: golangci-lint fmt
+        entry: golangci-lint fmt
+        language: system
+        pass_filenames: false
+      - id: golangci-lint
+        name: golangci-lint run
+        entry: golangci-lint run
+        language: system
+        pass_filenames: false
