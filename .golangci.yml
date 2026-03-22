@@ -246,6 +246,12 @@ linters:
         - pattern: "^print$"
         - pattern: "^println$"
 
+    gosec:
+      # G703 ("Path traversal via taint analysis") is too noisy for this CLI because
+      # config paths are intentionally user-provided local filesystem paths.
+      excludes:
+        - G703
+
     exhaustruct:
       # List of regular expressions to match type names that should be excluded from processing.
       # Anonymous structs can be matched by '<anonymous>' alias.
