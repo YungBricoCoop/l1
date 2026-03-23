@@ -18,12 +18,12 @@ builds:
 
 archives:
   - formats: [tar.gz]
-    name_template: 'l1_{{ .Version | trimprefix "v" }}_{{ .Os }}_{{ .Arch }}'
+    name_template: 'l1_{{ trimprefix .Version "v" }}_{{ .Os }}_{{ .Arch }}'
     wrap_in_directory: false
   - id: windows
     ids: [default]
     formats: [zip]
-    name_template: 'l1_{{ .Version | trimprefix "v" }}_{{ .Os }}_{{ .Arch }}'
+    name_template: 'l1_{{ trimprefix .Version "v" }}_{{ .Os }}_{{ .Arch }}'
 
 checksum:
   name_template: "checksums.txt"
