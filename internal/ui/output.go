@@ -9,6 +9,8 @@ import (
 	"os"
 
 	"charm.land/lipgloss/v2"
+	"github.com/YungBricoCoop/l1/internal/theme"
+	catppuccin "github.com/catppuccin/go"
 	"github.com/charmbracelet/x/term"
 )
 
@@ -16,10 +18,12 @@ import (
 type Styles struct {
 	color bool
 
-	infoStyle     lipgloss.Style
-	successStyle  lipgloss.Style
-	errorStyle    lipgloss.Style
-	progressStyle lipgloss.Style
+	infoStyle      lipgloss.Style
+	successStyle   lipgloss.Style
+	errorStyle     lipgloss.Style
+	progressStyle  lipgloss.Style
+	s3TagStyle     lipgloss.Style
+	configTagStyle lipgloss.Style
 }
 
 // Tag defines a command-specific label style, such as [s3] or [config].
@@ -39,14 +43,38 @@ const (
 	uiKiBBase      int64 = 1024
 )
 
-func NewStyles(color bool) Styles {
-	return Styles{
-		color:         color,
-		infoStyle:     lipgloss.NewStyle().Foreground(lipgloss.Color("#D0D7DE")),
-		successStyle:  lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#3FB950")),
-		errorStyle:    lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#F85149")),
-		progressStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("#58A6FF")),
+func NewStyles(color bool, themeName string) Styles {
+	flavour, err := theme.FlavourByName(themeName)
+	if err != nil {
+		flavour = catppuccin.Mocha
 	}
+
+	return Styles{
+		color:          color,
+		infoStyle:      lipgloss.NewStyle().Foreground(lipgloss.Color(flavour.Text().Hex)),
+		successStyle:   lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color(flavour.Green().Hex)),
+		errorStyle:     lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color(flavour.Red().Hex)),
+		progressStyle:  lipgloss.NewStyle().Foreground(lipgloss.Color(flavour.Blue().Hex)),
+		s3TagStyle:     tagStyle(flavour, flavour.Mauve(), flavour.Base()),
+		configTagStyle: tagStyle(flavour, flavour.Overlay0(), flavour.Base()),
+	}
+}
+
+func tagStyle(flavour catppuccin.Flavour, background, foreground catppuccin.Color) lipgloss.Style {
+	return lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color(foreground.Hex)).
+		Background(lipgloss.Color(background.Hex)).
+		BorderForeground(lipgloss.Color(flavour.Surface2().Hex)).
+		Padding(0, 1)
+}
+
+func (s Styles) S3TagStyle() lipgloss.Style {
+	return s.s3TagStyle
+}
+
+func (s Styles) ConfigTagStyle() lipgloss.Style {
+	return s.configTagStyle
 }
 
 func NewTag(name string, style lipgloss.Style) Tag {

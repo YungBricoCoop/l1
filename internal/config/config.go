@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/YungBricoCoop/l1/internal/theme"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/spf13/viper"
 )
@@ -30,8 +31,9 @@ type S3Config struct {
 }
 
 type UIConfig struct {
-	Color    bool `mapstructure:"color"    toml:"color"`
-	Progress bool `mapstructure:"progress" toml:"progress"`
+	Color    bool   `mapstructure:"color"    toml:"color"`
+	Progress bool   `mapstructure:"progress" toml:"progress"`
+	Theme    string `mapstructure:"theme"    toml:"theme"`
 }
 
 const (
@@ -51,6 +53,7 @@ func DefaultConfig() Config {
 		UI: UIConfig{
 			Color:    true,
 			Progress: true,
+			Theme:    theme.DefaultName(),
 		},
 	}
 }
@@ -77,6 +80,7 @@ func Load(path string) (Config, error) {
 	v.SetConfigFile(path)
 	v.SetDefault("ui.color", true)
 	v.SetDefault("ui.progress", true)
+	v.SetDefault("ui.theme", theme.DefaultName())
 
 	if err := v.ReadInConfig(); err != nil {
 		if os.IsNotExist(err) {
@@ -276,6 +280,18 @@ func SetConfigValue(cfg *Config, key string, value any) error {
 			return fmt.Errorf("invalid value type for %s", key)
 		}
 		cfg.UI.Progress = v
+	case "ui.theme":
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("invalid value type for %s", key)
+		}
+
+		canonicalTheme, err := theme.CanonicalName(v)
+		if err != nil {
+			return err
+		}
+
+		cfg.UI.Theme = canonicalTheme
 	default:
 		return fmt.Errorf("unsupported config key %q", key)
 	}
@@ -306,6 +322,10 @@ func ResolveSecretValue(value string) (string, error) {
 }
 
 func (c Config) Validate() error {
+	if _, err := theme.CanonicalName(c.UI.Theme); err != nil {
+		return err
+	}
+
 	if c.S3.URL != "" {
 		u, err := url.Parse(c.S3.URL)
 		if err != nil {
@@ -341,6 +361,8 @@ func (c Config) ValidateForPush(bucketOverride string) error {
 func configKeyType(key string) (string, bool) {
 	switch key {
 	case "s3.url", "s3.region", "s3.access_key", "s3.secret_key", "s3.default_bucket":
+		return keyTypeString, true
+	case "ui.theme":
 		return keyTypeString, true
 	case "ui.color", "ui.progress":
 		return keyTypeBool, true

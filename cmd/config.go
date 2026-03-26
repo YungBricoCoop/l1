@@ -165,7 +165,7 @@ func runConfigSet(cmd *cobra.Command, path, key, rawValue string) error {
 		return setErr
 	}
 
-	logger := newConfigLogger(ui.ShouldUseColor(cfg.UI.Color, cmd.OutOrStdout()))
+	logger := newConfigLogger(ui.ShouldUseColor(cfg.UI.Color, cmd.OutOrStdout()), cfg.UI.Theme)
 
 	validateErr := cfg.Validate()
 	if validateErr != nil {
@@ -184,8 +184,9 @@ func runConfigSet(cmd *cobra.Command, path, key, rawValue string) error {
 func configCommandLogger(cmd *cobra.Command, path string) ui.Logger {
 	cfg, err := appconfig.LoadForEdit(path)
 	if err != nil {
-		return newConfigLogger(ui.ShouldUseColor(true, cmd.OutOrStdout()))
+		defaultCfg := appconfig.DefaultConfig()
+		return newConfigLogger(ui.ShouldUseColor(defaultCfg.UI.Color, cmd.OutOrStdout()), defaultCfg.UI.Theme)
 	}
 
-	return newConfigLogger(ui.ShouldUseColor(cfg.UI.Color, cmd.OutOrStdout()))
+	return newConfigLogger(ui.ShouldUseColor(cfg.UI.Color, cmd.OutOrStdout()), cfg.UI.Theme)
 }

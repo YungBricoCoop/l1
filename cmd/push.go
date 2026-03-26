@@ -36,7 +36,7 @@ func newPushCmd(opts *rootOptions) *cobra.Command {
 				return validateErr
 			}
 
-			logger := newS3Logger(ui.ShouldUseColor(cfg.UI.Color, cmd.OutOrStdout()))
+			logger := newS3Logger(ui.ShouldUseColor(cfg.UI.Color, cmd.OutOrStdout()), cfg.UI.Theme)
 			resolvedBucket := resolveTransferBucket(cfg.S3.DefaultBucket, bucket)
 			resolvedKey := resolveTransferKey(args[0], objectKey)
 			reporter := newS3ProgressReporter(cmd.OutOrStdout(), logger, "uploading", cfg.UI.Progress)

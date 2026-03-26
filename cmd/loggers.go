@@ -4,26 +4,15 @@
 package cmd
 
 import (
-	"charm.land/lipgloss/v2"
 	"github.com/YungBricoCoop/l1/internal/ui"
 )
 
-func newS3Logger(color bool) ui.Logger {
-	tagStyle := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#FFF5F5")).
-		Background(lipgloss.Color("#832be7")).
-		Padding(0, 1)
-
-	return ui.NewLogger(ui.NewStyles(color), ui.NewTag("s3", tagStyle))
+func newS3Logger(color bool, themeName string) ui.Logger {
+	styles := ui.NewStyles(color, themeName)
+	return ui.NewLogger(styles, ui.NewTag("s3", styles.S3TagStyle()))
 }
 
-func newConfigLogger(color bool) ui.Logger {
-	tagStyle := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#FFFFFF")).
-		Background(lipgloss.Color("#111111")).
-		Padding(0, 1)
-
-	return ui.NewLogger(ui.NewStyles(color), ui.NewTag("config", tagStyle))
+func newConfigLogger(color bool, themeName string) ui.Logger {
+	styles := ui.NewStyles(color, themeName)
+	return ui.NewLogger(styles, ui.NewTag("config", styles.ConfigTagStyle()))
 }

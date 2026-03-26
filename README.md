@@ -46,6 +46,7 @@ l1 config --show
 l1 config s3.url "https://s3.eu-west-1.amazonaws.com"
 l1 config s3.default_bucket "mybucket"
 l1 config ui.progress false
+l1 config ui.theme "catppuccin-mocha"
 
 l1 push ./file.txt
 l1 push ./file.txt --bucket other-bucket --key backups/file.txt
@@ -78,7 +79,15 @@ default_bucket = "mybucket"
 [ui]
 color = true
 progress = true
+theme = "catppuccin-mocha"
 ```
+
+Supported `ui.theme` values:
+
+- `catppuccin-mocha` (default)
+- `catppuccin-frappe`
+- `catppuccin-macchiato`
+- `catppuccin-latte`
 
 ## Development tooling
 
@@ -88,7 +97,3 @@ This project uses the following tools in development and CI:
 - [pre-commit](https://github.com/pre-commit/pre-commit) to run checks before commits.
 - [REUSE](https://github.com/fsfe/reuse-tool) for license and copyright compliance.
 - [bump-my-version](https://github.com/callowayproject/bump-my-version) for version bump automation.
-
-## Todo
-
-- [ ] Use Catpuccin colors
