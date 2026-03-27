@@ -20,6 +20,7 @@ import (
 type Config struct {
 	S3 S3Config `mapstructure:"s3" toml:"s3"`
 	UI UIConfig `mapstructure:"ui" toml:"ui"`
+	GI GIConfig `mapstructure:"gi" toml:"gi"`
 }
 
 type S3Config struct {
@@ -36,9 +37,14 @@ type UIConfig struct {
 	Theme    string `mapstructure:"theme"    toml:"theme"`
 }
 
+type GIConfig struct {
+	Templates []string `mapstructure:"templates" toml:"templates"`
+}
+
 const (
-	keyTypeString = "string"
-	keyTypeBool   = "bool"
+	keyTypeString      = "string"
+	keyTypeBool        = "bool"
+	keyTypeStringSlice = "string_slice"
 )
 
 func DefaultConfig() Config {
@@ -54,6 +60,9 @@ func DefaultConfig() Config {
 			Color:    true,
 			Progress: true,
 			Theme:    theme.DefaultName(),
+		},
+		GI: GIConfig{
+			Templates: []string{},
 		},
 	}
 }
@@ -81,6 +90,7 @@ func Load(path string) (Config, error) {
 	v.SetDefault("ui.color", true)
 	v.SetDefault("ui.progress", true)
 	v.SetDefault("ui.theme", theme.DefaultName())
+	v.SetDefault("gi.templates", []string{})
 
 	if err := v.ReadInConfig(); err != nil {
 		if os.IsNotExist(err) {
@@ -227,6 +237,8 @@ func ParseValueForKey(key, raw string) (any, error) {
 			return nil, fmt.Errorf("invalid bool for %s: %q", key, raw)
 		}
 		return v, nil
+	case keyTypeStringSlice:
+		return parseStringSlice(raw), nil
 	default:
 		return nil, fmt.Errorf("unsupported config type %q for key %q", typeName, key)
 	}
@@ -237,66 +249,133 @@ func SetConfigValue(cfg *Config, key string, value any) error {
 		return errors.New("config cannot be nil")
 	}
 
+	handled, err := setS3ConfigValue(cfg, key, value)
+	if handled {
+		return err
+	}
+
+	handled, err = setUIConfigValue(cfg, key, value)
+	if handled {
+		return err
+	}
+
+	handled, err = setGIConfigValue(cfg, key, value)
+	if handled {
+		return err
+	}
+
+	return fmt.Errorf("unsupported config key %q", key)
+}
+
+func setS3ConfigValue(cfg *Config, key string, value any) (bool, error) {
 	switch key {
 	case "s3.url":
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("invalid value type for %s", key)
+		strValue, err := valueAsString(key, value)
+		if err != nil {
+			return true, err
 		}
-		cfg.S3.URL = v
+		cfg.S3.URL = strValue
 	case "s3.region":
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("invalid value type for %s", key)
+		strValue, err := valueAsString(key, value)
+		if err != nil {
+			return true, err
 		}
-		cfg.S3.Region = v
+		cfg.S3.Region = strValue
 	case "s3.access_key":
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("invalid value type for %s", key)
+		strValue, err := valueAsString(key, value)
+		if err != nil {
+			return true, err
 		}
-		cfg.S3.AccessKey = v
+		cfg.S3.AccessKey = strValue
 	case "s3.secret_key":
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("invalid value type for %s", key)
+		strValue, err := valueAsString(key, value)
+		if err != nil {
+			return true, err
 		}
-		cfg.S3.SecretKey = v
+		cfg.S3.SecretKey = strValue
 	case "s3.default_bucket":
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("invalid value type for %s", key)
+		strValue, err := valueAsString(key, value)
+		if err != nil {
+			return true, err
 		}
-		cfg.S3.DefaultBucket = v
+		cfg.S3.DefaultBucket = strValue
+	default:
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func setUIConfigValue(cfg *Config, key string, value any) (bool, error) {
+	switch key {
 	case "ui.color":
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("invalid value type for %s", key)
+		boolValue, err := valueAsBool(key, value)
+		if err != nil {
+			return true, err
 		}
-		cfg.UI.Color = v
+		cfg.UI.Color = boolValue
+		return true, nil
 	case "ui.progress":
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("invalid value type for %s", key)
+		boolValue, err := valueAsBool(key, value)
+		if err != nil {
+			return true, err
 		}
-		cfg.UI.Progress = v
+		cfg.UI.Progress = boolValue
+		return true, nil
 	case "ui.theme":
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("invalid value type for %s", key)
+		strValue, err := valueAsString(key, value)
+		if err != nil {
+			return true, err
 		}
 
-		canonicalTheme, err := theme.CanonicalName(v)
+		canonicalTheme, err := theme.CanonicalName(strValue)
 		if err != nil {
-			return err
+			return true, err
 		}
 
 		cfg.UI.Theme = canonicalTheme
+		return true, nil
 	default:
-		return fmt.Errorf("unsupported config key %q", key)
+		return false, nil
+	}
+}
+
+func setGIConfigValue(cfg *Config, key string, value any) (bool, error) {
+	if key != "gi.templates" {
+		return false, nil
 	}
 
-	return nil
+	sliceValue, err := valueAsStringSlice(key, value)
+	if err != nil {
+		return true, err
+	}
+
+	cfg.GI.Templates = sliceValue
+	return true, nil
+}
+
+func valueAsString(key string, value any) (string, error) {
+	v, ok := value.(string)
+	if !ok {
+		return "", fmt.Errorf("invalid value type for %s", key)
+	}
+	return v, nil
+}
+
+func valueAsBool(key string, value any) (bool, error) {
+	v, ok := value.(bool)
+	if !ok {
+		return false, fmt.Errorf("invalid value type for %s", key)
+	}
+	return v, nil
+}
+
+func valueAsStringSlice(key string, value any) ([]string, error) {
+	v, ok := value.([]string)
+	if !ok {
+		return nil, fmt.Errorf("invalid value type for %s", key)
+	}
+	return v, nil
 }
 
 func ResolveSecretValue(value string) (string, error) {
@@ -366,7 +445,25 @@ func configKeyType(key string) (string, bool) {
 		return keyTypeString, true
 	case "ui.color", "ui.progress":
 		return keyTypeBool, true
+	case "gi.templates":
+		return keyTypeStringSlice, true
 	default:
 		return "", false
 	}
+}
+
+func parseStringSlice(raw string) []string {
+	parts := strings.FieldsFunc(raw, func(r rune) bool {
+		return r == ',' || r == ' ' || r == '\t' || r == '\n'
+	})
+	values := make([]string, 0, len(parts))
+	for _, part := range parts {
+		value := strings.TrimSpace(part)
+		if value == "" {
+			continue
+		}
+		values = append(values, value)
+	}
+
+	return values
 }

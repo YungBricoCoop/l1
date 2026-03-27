@@ -47,12 +47,24 @@ l1 config s3.url "https://s3.eu-west-1.amazonaws.com"
 l1 config s3.default_bucket "mybucket"
 l1 config ui.progress false
 l1 config ui.theme "catppuccin-mocha"
+l1 config gi.templates "python macos visualstudiocode"
+
+l1 gi
+l1 gi m v p
+l1 gi macos visualstudiocode python
+l1 gi c
+l1 gi list
+l1 gi --list
+l1 gi p,m,v
+l1 gi p,m,v --output .gitignore.global
 
 l1 push ./file.txt
 l1 push ./file.txt --bucket other-bucket --key backups/file.txt
 l1 pull ./file.txt
 l1 pull ./downloads/file.txt --bucket other-bucket --key backups/file.txt
 ```
+
+`l1 gi` shortcut mapping: `p=python`, `v=visualstudiocode`, `g=go`, `m=macos`, `r=rust`.
 
 `l1` reads config from your user config directory by default:
 
@@ -80,6 +92,9 @@ default_bucket = "mybucket"
 color = true
 progress = true
 theme = "catppuccin-mocha"
+
+[gi]
+templates = ["python", "macos", "visualstudiocode"]
 ```
 
 Supported `ui.theme` values:

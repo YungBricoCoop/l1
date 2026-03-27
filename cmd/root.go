@@ -34,6 +34,7 @@ func newRootCmd(version string) *cobra.Command {
 	rootCmd.AddCommand(newPushCmd(opts))
 	rootCmd.AddCommand(newPullCmd(opts))
 	rootCmd.AddCommand(newConfigCmd(opts))
+	rootCmd.AddCommand(newGitignoreCmd(opts))
 
 	return rootCmd
 }

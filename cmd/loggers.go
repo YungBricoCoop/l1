@@ -16,3 +16,8 @@ func newConfigLogger(color bool, themeName string) ui.Logger {
 	styles := ui.NewStyles(color, themeName)
 	return ui.NewLogger(styles, ui.NewTag("config", styles.ConfigTagStyle()))
 }
+
+func newGitignoreLogger(color bool, themeName string) ui.Logger {
+	styles := ui.NewStyles(color, themeName)
+	return ui.NewLogger(styles, ui.NewTag("gi", styles.ConfigTagStyle()))
+}
